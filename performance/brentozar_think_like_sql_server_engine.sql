@@ -1,3 +1,6 @@
+
+--https://www.brentozar.com/archive/2021/03/download-the-current-stack-overflow-database-for-free-2021-02/
+
 use StackOverflow2010
 go
 
