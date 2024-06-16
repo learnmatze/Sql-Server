@@ -260,14 +260,19 @@ SELECT DisplayName, Location, UpVotes, Id
     AND UpVotes > 100;
 GO
 
+--1. Checking the Selectivity of the parts of the where filter
 select count(*) from users where DownVotes = 0;
 select count(*) from users where UpVotes > 100;
 
+--2. Create possible indexes
 create index UpVotes_DownVotes on dbo.Users(UpVotes, DownVotes)
 include (displayname, Location)
 
 create index DownVotes_UpVotes on dbo.Users(DownVotes, UpVotes)
 include (displayname, Location)
+
+--3. use the different indexes with query hints (index=1 is clustered index)
+set statistics io on;
 
 SELECT DisplayName, Location, UpVotes, Id
   FROM dbo.Users with (index=1)
@@ -287,14 +292,29 @@ SELECT DisplayName, Location, UpVotes, Id
     AND UpVotes > 100;
 GO
 
+--4. Create visualization queries that display only an index seek for a specific index
+--visualization query for index:
+--create index UpVotes_DownVotes on dbo.Users(UpVotes, DownVotes)
+--include (displayname, Location)
 select upvotes, downvotes, DisplayName, location,id
 from dbo.Users
-where UpVotes > 100
 order by upvotes, downvotes
+
+select upvotes, downvotes, DisplayName, location,id
+from dbo.Users
+where UpVotes > 100 --and DownVotes = 0
+order by upvotes, downvotes
+
+--visualization query for index:
+--create index DownVotes_UpVotes on dbo.Users(DownVotes, UpVotes)
+--include (displayname, Location)
+select downvotes, upvotes, DisplayName, location,id
+from dbo.Users
+order by downvotes, upvotes
 
 select downvotes, upvotes, DisplayName, location,id
 from dbo.Users
-where DownVotes = 0 and upvotes > 100
+where DownVotes = 0 --and upvotes > 100
 order by downvotes, upvotes
 
 /* ****************************************************************************

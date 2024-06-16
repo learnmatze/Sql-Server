@@ -18,7 +18,7 @@ GO
 
 
 /* I'm using the 50GB medium Stack database: */
-USE StackOverflow2010;
+USE StackOverflow2013;
 GO
 /* And this stored procedure drops all nonclustered indexes: */
 DropIndexes;
@@ -165,7 +165,21 @@ SELECT Id, DisplayName, Location
     AND Location <> N'Seattle, WA';
 GO
 
-
+SELECT
+    TotalRows,
+	EqDisplayNameMatchingRows,
+	EqLocationMatchingRows,
+	UneqLocationMatchingRows,
+    CAST(EqDisplayNameMatchingRows AS FLOAT) / TotalRows AS Selectivity_EqDisplayName,
+    CAST(EqLocationMatchingRows as FLOAT) / TotalRows AS Selectivity_EqLocation,
+    CAST(UneqLocationMatchingRows AS FLOAT) / TotalRows AS Selectivity_UneqLocation
+FROM
+    (SELECT
+        (SELECT COUNT(*) FROM dbo.Users WHERE DisplayName = 'alex') AS EqDisplayNameMatchingRows,
+        (SELECT COUNT(*) FROM dbo.Users WHERE Location = 'Seattle, WA') AS EqLocationMatchingRows,
+        (SELECT COUNT(*) FROM dbo.Users WHERE Location <> 'Seattle, WA') AS UneqLocationMatchingRows,
+        (SELECT COUNT(*) FROM dbo.Users) AS TotalRows
+    ) AS Counts;
 
 
 
