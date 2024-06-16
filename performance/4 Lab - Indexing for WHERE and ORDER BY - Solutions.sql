@@ -16,7 +16,7 @@ run the entire script. You don't need to run this:
 RAISERROR(N'Oops! No, don''t just hit F5. Run these demos one at a time.', 20, 1) WITH LOG;
 GO
 
-use StackOverflow2010
+use StackOverflow2013
 go
 
 

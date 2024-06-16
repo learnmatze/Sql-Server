@@ -16,7 +16,7 @@ run the entire script. You don't need to run this:
 RAISERROR(N'Oops! No, don''t just hit F5. Run these demos one at a time.', 20, 1) WITH LOG;
 GO
 
-use StackOverflow2010
+use StackOverflow2013
 go
 
 DropIndexes;
@@ -34,6 +34,7 @@ like NVARCHAR(500) or VARCHAR(500). Not allowed to use 'em as includes, either.
 Here's your first query: find the users in Antarctica, and list their highly
 upvoted comments sorted from newest to oldest.
 */
+set statistics io on;
 
 SELECT u.DisplayName, u.Location, 
     c.Score AS CommentScore, c.Text AS CommentText
@@ -44,8 +45,33 @@ SELECT u.DisplayName, u.Location,
   ORDER BY c.CreationDate;
 GO
 
+select count(*) from dbo.users u where u.Location = 'Antarctica'
 
+create index Location on dbo.users(location)
+include (DisplayName)
 
+select count(*) from dbo.Comments c where c.Score > 0
+
+create index UserId on dbo.Comments(userid)
+include (Score, CreationDate)
+
+SELECT u.DisplayName, u.Location, 
+    c.Score AS CommentScore, c.Text AS CommentText
+  FROM dbo.Users u with (index=1)
+  INNER JOIN dbo.Comments c with (index=1) ON u.Id = c.UserId
+  WHERE u.Location = 'Antarctica'
+    AND c.Score > 0
+  ORDER BY c.CreationDate;
+GO
+
+SELECT u.DisplayName, u.Location, 
+    c.Score AS CommentScore, c.Text AS CommentText
+  FROM dbo.Users u
+  INNER JOIN dbo.Comments c ON u.Id = c.UserId
+  WHERE u.Location = 'Antarctica'
+    AND c.Score > 0
+  ORDER BY c.CreationDate;
+GO
 
 
 /* ****************************************************************************
